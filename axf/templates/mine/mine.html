@@ -15,27 +15,34 @@
     <div id="mine">
 
         <div class="fixed">
+            {% if users %}
             <!--如果登录，展示头像-->
-                <img src="" alt="icon">
+                <img src="/media/{{ users.icon }}/" alt="icon">
             <!--或者-->
+            {% else %}
                 <span class="glyphicon glyphicon-user"></span>
             <!--判断结束-->
+            {% endif %}
 
+            {% if users %}
             <!--如果登录，展示姓名-->
-                <p></p>
+                <p>{{ users.username }}</p>
             <!--或者展示登录的链接-->
-                <a href=""></a>
+            {% else %}
+                <a href="/uauth/login/">登录</a>
             <!--判断结束-->
+            {% endif %}
 
 
-
+            {% if users %}
             <p><span class="glyphicon glyphicon-fire"></span><span>等级</span></p>
             <!--如果没有登录,展示注册信息-->
+            {% else %}
                 <div id="regis">
                     <a href="/uauth/register/">注册</a>
                 </div>
             <!--判断结束-->
-
+            {% endif %}
             <p><span class="glyphicon glyphicon-heart"></span><span>收藏</span></p>
 
         </div>
@@ -52,6 +59,7 @@
                             <dt><span id="wait_pay_list" class="glyphicon glyphicon-usd"></span>
                                 <span class="badge">
                                     <!--代付款的数量-->
+                                    {{ data.wait }}
                                 </span></dt>
                             <dd>待付款</dd>
                         </dl>
@@ -62,6 +70,7 @@
                             <dt><span id="order_payed_list" class="glyphicon glyphicon-envelope"></span>
                                 <span class="badge">
                                     <!--待收货的数量-->
+                                    {{ data.payed }}
                                 </span></dt>
                             <dd>待收货</dd>
                         </dl>
@@ -122,11 +131,12 @@
             </menu>
 
             <!--如果登录了,则退出展示-->
-
+            {% if users %}
                 <p class="logout">
-                    <a href="">退出</a>
+                    <a href="/uauth/logout/">退出</a>
                 </p>
             <!--判断结束-->
+            {% endif %}
         </div>
     </div>
 

@@ -106,8 +106,8 @@ class UserModel(models.Model):
 
 # 购物车
 class CartModel(models.Model):
-    user = models.ForeignKey(UserModel)  # 关联用户
-    goods = models.ForeignKey(Goods)  # 关联商品
+    user = models.ForeignKey(UserModel, related_name='user_id')  # 关联用户
+    goods = models.ForeignKey(Goods, related_name='goods_id')  # 关联商品
     c_num = models.IntegerField(default=1)  # 商品的个数
     is_select = models.BooleanField(default=True)  # 是否选择商品
 
@@ -119,8 +119,11 @@ class OrderModel(models.Model):
     user = models.ForeignKey(UserModel)  # 关联用户
     o_num = models.CharField(max_length=64)  # 数量
     # 0 代表已下单， 但是未付款， 1已付款未发货， 2 已付款已发货
-    o_status = models.IntegerField(default=0) # 状态
+    o_status = models.IntegerField(default=0)  # 状态
     o_create = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'axf_order'
 
 
 class OderGoodsModel(models.Model):

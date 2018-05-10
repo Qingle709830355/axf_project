@@ -62,44 +62,53 @@
         {#          商店    #}
         <div class="CVS">
             <!--处理第一个店铺的数据的图片-->
+            {% for shop in shops %}
+            {% if forloop.counter == 1 %}
             <h2>
                 <img src="{{ shop1.img }}" alt="">
             </h2>
+                {% endif %}
+            {% endfor %}
             <!--处理结束-->
 
             <fieldset>
                 <!--处理第二个到第三个数据-->
-                {% for shop in shop2to3 %}
+                {% for shop in shops %}
+                {% if forloop.counter >= 2 and forloop.counter <= 3%}
                     <a href="#">
                         <img src="{{ shop.img }}" alt="">
                     </a>
                 <!--处理结束-->
+                    {% endif %}
                 {% endfor %}
             </fieldset>
 
             <ul>
                 <!--处理第五个到第八个数据-->
-                {% for shop in shop4to7 %}
+                {% for shop in shops %}
+                {% if forloop.counter >= 4 and forloop.counter <= 7 %}
                     <li>
                         <a href="#">
                             <img src="{{ shop.img }}" alt="">
                             <span>{{ shop.name }}</span>
                         </a>
                     </li>
-                {% endfor %}
                 <!--处理结束-->
-
+                {% endif %}
+                {% endfor %}
             </ul>
 
             <ol>
                 <!--处理第八个到第十二个数据-->
-                {% for shop in shop8to11 %}
+                {% for shop in shops %}
+                {% if forloop.counter >= 8 and forloop.counter <= 11 %}
                     <li>
                         <a href="#">
                             <img src="{{ shop.img }}" alt="">
                         </a>
                     </li>
                 <!--处理结束-->
+                    {% endif %}
                 {% endfor %}
 
             </ol>

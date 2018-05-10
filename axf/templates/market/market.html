@@ -7,6 +7,8 @@
 
 {% block EXTJS %}
     <script type="text/javascript" src="{% static 'app/market/js/market.js' %}"></script>
+    <script>
+    </script>
 {% endblock %}
 
 
@@ -17,15 +19,17 @@
         <aside>
 
             <ul>
-
+                {% for foodtype in foodtypes %}
                 <!--闪购分类展示-->
                     <li>
                         <!--链接地址，点击获取分类下的商品信息-->
-                        <a href=""></a>
+                        <a href="/axf/market/?typeid={{ foodtype.typeid }}">{{ foodtype.typename }}</a>
+                        {% if foodtype.typeid == foodtype1.typeid %}
                             <span class="yellowSlide"></span>
-
+                        {% endif %}
                     </li>
                 <!--处理数据结束-->
+                {% endfor %}
 
             </ul>
 
@@ -43,42 +47,46 @@
 
             <menu>
                 <ul>
-
+                    {% for good in goods %}
                     <!--商品信息展示-->
                         <li>
                             <a href="#">
-                                <img src="" alt="">
+                                <img src="{{ good.productimg }}" alt="">
                                 <div class="shoppingInfo">
-                                    <h6></h6>
+                                    <h6>{{ good.productlongname }}</h6>
                                     <p class="detailTag">
                                         <span>精选</span>
-                                        <span></span>
+                                        <span>热销中</span>
                                     </p>
                                     <p class="unit">
 
                                     </p>
                                     <p class="price">
-                                        <span>¥</span>
-                                        <s>¥</s>
+                                        <span>¥{{ good.price }}</span>
+                                        <s>¥ {{ good.marketprice }}</s>
                                     </p>
                                 </div>
                             </a>
                         <section>
-                            <button goodsid="" class="subShopping">-</button>
-                            <span>0</span>
-                            <button goodsid="" class="addShopping">+</button>
+                            {% csrf_token %}
+                            <button goodsid="{{ good.id }}" onclick="subtocart({{ good.id }})">-</button>
+                            <span id="span{{ good.id }}">0</span>
+                            <button goodsid="{{ good.id }}" onclick="addtocart({{ good.id }})">+</button>
                         </section>
                         </li>
                     <!--处理数据结束-->
+                    {% endfor %}
                 </ul>
 
                 <div id="all_types_container">
                     <div>
+                        {% for listname in listnames %}
                         <!--加载全部分类的数据-->
-                            <a href="">
-                                <span></span>
+                            <a href="/axf/market/?id={{ listname.id }}&typeid={{ foodtype1.typeid }}">
+                                <span>{{ listname.name }}</span>
                             </a>
                         <!--处理数据结束-->
+                        {% endfor %}
 
 
                     </div>
@@ -88,16 +96,16 @@
                 <div id="sort_container">
                     <div>
 {#      排序传递的也是状态码   0 , 1 ,2  , 3 ,4 ,5...                    #}
-                        <a href="">
+                        <a href="/axf/market/?type={{ 1 }}&typeid={{ foodtype1.typeid }}&id={{ childid }}">
                             <span>综合排序</span>
                         </a>
-                        <a href="">
+                        <a href="/axf/market/?type={{ 2 }}&typeid={{ foodtype1.typeid }}&id={{ childid }}">
                             <span>销量排序</span>
                         </a>
-                        <a href="">
+                        <a href="/axf/market/?type={{ 3 }}&typeid={{ foodtype1.typeid }}&id={{ childid }}">
                             <span>价格降序</span>
                         </a>
-                        <a href="">
+                        <a href="/axf/market/?type={{ 4 }}&typeid={{ foodtype1.typeid }}&id={{ childid }}">
                             <span>价格升序</span>
                         </a>
 

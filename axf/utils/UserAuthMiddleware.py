@@ -13,12 +13,17 @@ class AuthMiddleware(MiddlewareMixin):
         :param request:
         :return:
         """
-        if request.path == '/uauth/login/' or request.path == '/axf/market/' or request.path == '/axf/mine/'\
-                or request.path == '/uauth/register/':
+        a = request.path
+        if request.path == '/uauth/login/' or request.path == '/uauth/logout/':
             return None
         ticket = request.COOKIES.get('ticket')
-        if not ticket:
-            return HttpResponseRedirect('/uauth/login')
+        if request.path == '/axf/cart/':
+
+            if not ticket:
+                return HttpResponseRedirect('/uauth/login')
+        else:
+            if not ticket:
+                return None
 
         users = UserModel.objects.filter(u_ticket=ticket)
         if not users:

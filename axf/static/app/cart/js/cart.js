@@ -2,67 +2,67 @@
 $(function () {
 
 
-    $(".is_choose").click(function () {
-        console.log("点击");
-        var current_li = $(this);
-        var cart_id = current_li.parents("li").attr("cartid");
-        console.log(cart_id);
-
-        $.getJSON("/axf/changecartstatus/", {"cart_id":cart_id}, function (data) {
-            console.log(data);
-            if (data["status"] == "200"){
-                if (data["check"]){
-                    var span = current_li.find("span");
-                    span.html("√");
-
-                    if(data["is_all_select"]){
-                        $("#all_select").find("span").html("<span>√</span>");
-                    }
-
-                }else{
-                    var span = current_li.find("span");
-                    span.html("");
-                    $("#all_select").find("span").html("<span></span>");
-                }
-                current_li.attr("is_select",data["check"]);
-            }
-        })
-    })
-
-
-    $(".subShopping").click(function () {
-        // 代表记住我们这一样  真实是点击的button
-        var current_li = $(this);
-        var cart_id = current_li.parents("li").attr("cartid");
-        console.log(cart_id);
-
-        $.getJSON("/axf/subcart/", {"cart_id": cart_id}, function (data) {
-
-            console.log(data);
-
-            if (data["status"] == "200"){
-                current_li.next().html(data["c_num"]);
-            }else if (data["status"] == "903"){
-                current_li.parents("li").remove();
-            }
-        })
-
-    })
+    // $(".is_choose").click(function () {
+    //     console.log("点击");
+    //     var current_li = $(this);
+    //     var cart_id = current_li.parents("li").attr("cartid");
+    //     console.log(cart_id);
+    //
+    //     $.getJSON("/axf/changecartstatus/", {"cart_id":cart_id}, function (data) {
+    //         console.log(data);
+    //         if (data["status"] == "200"){
+    //             if (data["check"]){
+    //                 var span = current_li.find("span");
+    //                 span.html("√");
+    //
+    //                 if(data["is_all_select"]){
+    //                     $("#all_select").find("span").html("<span>√</span>");
+    //                 }
+    //
+    //             }else{
+    //                 var span = current_li.find("span");
+    //                 span.html("");
+    //                 $("#all_select").find("span").html("<span></span>");
+    //             }
+    //             current_li.attr("is_select",data["check"]);
+    //         }
+    //     })
+    // })
 
 
-    $(".addShopping").click(function () {
-
-        var current_li = $(this);
-        var cart_id = current_li.parents("li").attr("cartid");
-
-        $.getJSON("/axf/addcart/", {"cart_id": cart_id}, function (data) {
-            console.log(data);
-            if (data["status"] == "200"){
-                current_li.prev().html(data["c_num"]);
-            }
-        })
-
-    })
+    // $(".subShopping").click(function () {
+    //     // 代表记住我们这一样  真实是点击的button
+    //     var current_li = $(this);
+    //     var cart_id = current_li.parents("li").attr("cartid");
+    //     console.log(cart_id);
+    //
+    //     $.getJSON("/axf/subcart/", {"cart_id": cart_id}, function (data) {
+    //
+    //         console.log(data);
+    //
+    //         if (data["status"] == "200"){
+    //             current_li.next().html(data["c_num"]);
+    //         }else if (data["status"] == "903"){
+    //             current_li.parents("li").remove();
+    //         }
+    //     })
+    //
+    // })
+    //
+    //
+    // $(".addShopping").click(function () {
+    //
+    //     var current_li = $(this);
+    //     var cart_id = current_li.parents("li").attr("cartid");
+    //
+    //     $.getJSON("/axf/addcart/", {"cart_id": cart_id}, function (data) {
+    //         console.log(data);
+    //         if (data["status"] == "200"){
+    //             current_li.prev().html(data["c_num"]);
+    //         }
+    //     })
+    //
+    // })
 
 
     $("#all_select").click(function () {
@@ -159,8 +159,31 @@ $(function () {
 
         }
 
-    })
+    });
+
+    $(".is_choose").on('click', function () {
+        cart_id = $(this).attr('cart_id');
+        csrf = $('input[name="csrfmiddlewaretoken"]').val();
+        $.ajax({
+            type: 'post',
+            data: {'id': cart_id},
+            url: '/axf/changecartstatus/',
+            headers: {'X-CSRFToken': csrf},
+            error: function (msg) {
+                console.log('错误');
+            },
+
+            success: function (msg) {
+                console.log(msg);
+                if(msg.is_select){
+                    $('#select_' + cart_id).text('√')
+                }else{
+                    $('#select_' + cart_id).text('')
+                }
+            }
+        })
+    });
 
 
 
-})
+});

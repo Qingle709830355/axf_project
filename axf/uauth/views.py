@@ -28,6 +28,7 @@ def login(request):
                 now_time = int(time.time())
                 ticket = 'TK_' + ticket + str(now_time)
                 response = HttpResponseRedirect('/axf/home')
+                response.set_cookie('ticket', ticket, max_age=99999)
                 user.u_ticket = ticket
                 user.save()
                 return response
@@ -57,6 +58,10 @@ def register(request):
 
 def logout(request):
     if request.method == 'GET':
-        response = HttpResponseRedirect('/uauth/login/')
+        response = HttpResponseRedirect('/axf/mine')
+        ticket = request.COOKIES.get('ticket')
         response.delete_cookie('ticket')
-        return HttpResponseRedirect('/uauth/login/')
+        usermodel = UserModel.objects.get(u_ticket=ticket)
+        usermodel.u_ticket = ''
+        usermodel.save()
+        return response
