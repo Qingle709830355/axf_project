@@ -47,12 +47,15 @@ def register(request):
         password = request.POST.get('password')
         email = request.POST.get('email')
         img = request.FILES.get('icon')
-        UserModel.objects.create(
-            username=name,
-            password=make_password(password),
-            email=email,
-            icon=img
-        )
+        if not UserModel.objects.filter(username=name):
+            UserModel.objects.create(
+                username=name,
+                password=make_password(password),
+                email=email,
+                icon=img
+            )
+        else:
+            return render(request, 'user/user_register.html', {'message': '用户名已经存在了'})
         return HttpResponseRedirect('/uauth/login')
 
 
@@ -61,7 +64,8 @@ def logout(request):
         response = HttpResponseRedirect('/axf/mine')
         ticket = request.COOKIES.get('ticket')
         response.delete_cookie('ticket')
-        usermodel = UserModel.objects.get(u_ticket=ticket)
-        usermodel.u_ticket = ''
-        usermodel.save()
+        usermodel = UserModel.objects.filter(u_ticket=ticket)
+        if usermodel.exists():
+            usermodel[0].u_ticket = ''
+            usermodel[0].save()
         return response

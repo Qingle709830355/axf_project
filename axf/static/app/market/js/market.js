@@ -61,6 +61,7 @@ $(function () {
     //     alert('点击了这里！')
     // })
 
+    show_aready_choice()
 
 });
  //  添加商品到购物车
@@ -104,6 +105,137 @@ function subtocart(id) {
             console.log(msg);
             $(str1).text(msg.c_num);
             $('#total').text(msg.total)
+        }
+    })
+}
+
+function show_aready_choice(){
+        csrf = $('input[name="csrfmiddlewaretoken"]').val();
+        $.ajax({
+            type: 'get',
+            dataType: 'json',
+            url: '/axf/showareadychoice/',
+            headers: {'X-CSRFToken': csrf},
+            error: function (msg) {
+                console.log('请求错误！')
+            },
+
+            success: function (msg) {
+                console.log(msg);
+                for(var i = 0; i < msg.data.length; i++){
+                    $('#span'+ msg.data[i].good_id).text(msg.data[i].c_num);
+                }
+            }
+        });
+}
+
+function choose_foodtype(typeid) {
+
+    csrf = $('input[name="csrfmiddlewaretoken"]');
+    $.ajax({
+        type: 'get',
+        dataType: 'json',
+        url: '/axf/typeidchoice/',
+        data: {'typeid': typeid},
+        headers: {'X-CSRFToken': csrf},
+        error: function (msg) {
+            console.log('请求失败！')
+        },
+
+        success: function (msg) {
+            console.log(msg);
+            var goods = msg.goods;
+
+            $('.yellowSlide').attr('class', '').attr('foodtype', '');
+            $('#id_' + typeid).attr('class', 'yellowSlide').attr('foodtype', typeid);
+            $('#show-goods').empty();
+            $('#typeslist').empty();
+            for(var i = 0; i < goods.length; i++){
+                if(('' +goods[i].price).length == 1){
+                    goods[i].price = goods[i].price + '.0'
+                }
+                if(('' + goods[i].marketprice).length == 1){
+                    goods[i].marketprice = goods[i].marketprice + '.0'
+                }
+                s = '<li>' +
+                    '<a href="#"><img src="' + goods[i].productimg + '" alt="" id="good_img">' +
+                    '<div class="shoppingInfo">' +
+                    '<h6>' +  goods[i].productlongname +  '</h6>' +
+                    '<p class="detailTag"><span>精选</span><span>热销中</span>' +
+                    '</p><p class="unit">' +
+                    '</p><p class="price">' +
+                    '<span>￥'+ goods[i].price + '</span>'+
+                    '<s>￥' + goods[i].marketprice + '</s></p></div></a>' +
+                    '<section>' +
+                    '<button goodsid="' +  goods[i].id +'" onclick="subtocart(' + goods[i].id +' )">-</button>' +
+                    '<span id="span'+ goods[i].id +'">0</span>'+
+                    '<button goodsid="' + goods[i].id + '" onclick="addtocart('+ goods[i].id + ')">+</button>' +
+                    '</section></li>';
+                $('#show-goods').append(s)
+            }
+            for(var j = 0; j < msg.listnames.length; j++){
+                s = '<a href="#" onclick="choice_childid('+ msg.listnames[j].id +  ',' + 1 + ')">\n' +
+                    '<span>'+msg.listnames[j].childname + '</span>\n' +
+                    '</a>';
+                $('#typeslist').append(s)
+            }
+            show_aready_choice()
+        }
+    });
+}
+
+function choice_childid(childid, type) {
+    typeid = $('.yellowSlide').attr('foodtype');
+    $.ajax({
+        type: 'get',
+        dataType: 'json',
+        url: '/axf/childidchoice/',
+        data: {'typeid': typeid, 'childid': childid, 'type': type},
+        error: function (msg) {
+            console.log(msg);
+            console.log('请求失败！');
+        },
+
+        success: function (msg) {
+            console.log(msg);
+            var goods = msg.goods;
+            $('#show-goods').empty();
+            $('#typeslist').empty();
+            for(var i = 0; i < goods.length; i++){
+                if(('' +goods[i].price).length == 1){
+                    goods[i].price = goods[i].price + '.0'
+                }
+                if(('' + goods[i].marketprice).length == 1){
+                    goods[i].marketprice = goods[i].marketprice + '.0'
+                }
+                s = '<li>' +
+                    '<a href="#"><img src="' + goods[i].productimg + '" alt="" id="good_img">' +
+                    '<div class="shoppingInfo">' +
+                    '<h6>' +  goods[i].productlongname +  '</h6>' +
+                    '<p class="detailTag"><span>精选</span><span>热销中</span>' +
+                    '</p><p class="unit">' +
+                    '</p><p class="price">' +
+                    '<span>￥'+ goods[i].price + '</span>'+
+                    '<s>￥' + goods[i].marketprice + '</s></p></div></a>' +
+                    '<section>' +
+                    '<button goodsid="' +  goods[i].id +'" onclick="subtocart(' + goods[i].id +' )">-</button>' +
+                    '<span id="span'+ goods[i].id +'">0</span>'+
+                    '<button goodsid="' + goods[i].id + '" onclick="addtocart('+ goods[i].id + ')">+</button>' +
+                    '</section></li>';
+                $('#show-goods').append(s)
+            }
+            for(var j = 0; j < msg.listnames.length; j++){
+                s = '<a href="#" onclick="choice_childid('+ msg.listnames[j].id + ',' + 1 + ')">\n' +
+                    '<span id="">'+msg.listnames[j].childname + '</span>\n' +
+                    '</a>';
+                $('#typeslist').append(s);
+
+            }
+            for(var s = 1; s < 5; s ++){
+                    $('#sort_' + s).attr('onclick', 'choice_childid(' + childid + ',' + s + ')')
+            }
+
+            show_aready_choice()
         }
     })
 }

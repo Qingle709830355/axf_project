@@ -134,3 +134,9 @@ class OderGoodsModel(models.Model):
     class Meta:
         db_table = 'axf_order_goods'
 
+
+class PassUtilsTimes(models.Model):
+    p_times = models.IntegerField(max_length=1, default=0)
+
+    class Meta:
+        db_table = 'pass_utils_times'

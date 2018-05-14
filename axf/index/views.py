@@ -1,9 +1,12 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from rest_framework import mixins, viewsets
+from django.core import serializers
+from django.core.urlresolvers import reverse
 
 from index.models import MainWheel, MainNav, MainHotGoods, \
-    MainShop, Goods, MainShow, UserModel,FoodType, CartModel
+    MainShop, Goods, MainShow, UserModel,FoodType, CartModel, \
+    OrderModel, OderGoodsModel
 from index.serializers import CartSerializer
 from index.filters import CartFilter
 
@@ -31,7 +34,7 @@ def home(request):
 def mine(request):
     """我的页面"""
     if request.method == 'GET':
-        wait_pay, payed = 0, 0
+        wait_pay, payed, commit = 0, 0, 0
         ticket = request.COOKIES.get('ticket')
         if ticket:
             users = UserModel.objects.filter(u_ticket=ticket)
@@ -42,9 +45,12 @@ def mine(request):
                         wait_pay += 1
                     if order.o_status == 1:
                         payed += 1
+                    if order.o_status == 2:
+                        commit += 1
                 data = {
                     'wait': wait_pay,
-                    'payed': payed
+                    'payed': payed,
+                    'commit': commit
                 }
                 return render(request, 'mine/mine.html', {'users': users[0], 'data': data})
             else:
@@ -56,44 +62,113 @@ def mine(request):
 def market(request):
     """闪购"""
     if request.method == 'GET':
-        typeid = request.GET.get('typeid', 104749)
-        type = request.GET.get('type', '0')
-        childid = request.GET.get('id', '0')
-        foodtypes = FoodType.objects.filter()
+        foodtypes = FoodType.objects.all()
+        goods = Goods.objects.filter(categoryid=104749).order_by('id')
+        start_foodtype = FoodType.objects.get(typeid=104749)
+        foodchildnames = start_foodtype.childtypenames
+        listnames = change_to_dict(foodchildnames)
+        return render(request, 'market/market.html', {'foodtypes': foodtypes,
+                                                      'goods': goods,
+                                                      'listnames': listnames})
+
+
+def change_to_dict(foodchildnames):
+    """将字符串转化为字典"""
+    childnames = foodchildnames.split('#')  # 将字符串转化成列表形式
+    listnames = []
+    for childname in childnames:
+        dictnames = {}
+        childname = childname.split(':')
+        dictnames['childname'] = childname[0]
+        dictnames['id'] = childname[1]
+        listnames.append(dictnames)
+    return listnames
+
+
+def typeid_group_goods(request):
+    """按照typeid进行分类"""
+    if request.method == 'GET':
+        data = {
+            'msg': '请求成功！',
+            'coding': 200,
+        }
+        listgoods = []
+        typeid = request.GET.get('typeid')
+        foodchildnames = FoodType.objects.get(typeid=typeid).childtypenames
+        listnames = change_to_dict(foodchildnames)
+        data['listnames'] = listnames
+        goods = Goods.objects.filter(categoryid=typeid)
+        for good in goods:
+            dict1 = {}
+            dict1['id'] = good.id
+            dict1['productimg'] = good.productimg
+            dict1['productlongname'] = good.productlongname
+            dict1['price'] = good.price
+            dict1['marketprice'] = good.marketprice
+            listgoods.append(dict1)
+        data['goods'] = listgoods
+        return JsonResponse(data)
+
+
+def show_aready_choice(request):
+    """在闪购页面展示已经选择好的商品个数"""
+    if request.method == 'GET':
+        data = {
+            'msg': '请求成功！',
+            'coding': 200,
+        }
+        cartslist = []
         user = request.user
+        if user and user.id:
+            carts = CartModel.objects.filter(user_id=user.id)
+            for cart in carts:
+                dict1 = {}
+                dict1['good_id'] = cart.goods.id
+                dict1['c_num'] = cart.c_num
+                cartslist.append(dict1)
+
+            data['data'] = cartslist
+
+            return JsonResponse(data)
+
+
+def childid_choice(request):
+    if request.method == 'GET':
+        data = {
+            'message': '请求成功！',
+            'coding': 200
+        }
+        listgoods = []
+        childid = request.GET.get('childid')
+        typeid = request.GET.get('typeid')
+        type = request.GET.get('type')
         if childid == '0':
             goods = Goods.objects.filter(categoryid=int(typeid))
         else:
             goods = Goods.objects.filter(childcid=int(childid))
-        if type != '0':
-            if type == '1':
-                goods = goods.order_by('productid')
+        foodchildnames = FoodType.objects.get(typeid=int(typeid)).childtypenames
+        listnames = change_to_dict(foodchildnames)
+        data['listnames'] = listnames
 
-            if type == '2':
-                goods = goods.order_by('-productnum')
+        if type == '1':
+            goods = goods.order_by('id')
+        if type == '2':
+            goods = goods.order_by('productnum')
+        if type == '3':
+            goods = goods.order_by('price')
+        if type == '4':
+            goods = goods.order_by('-price')
 
-            if type == '3':
-                goods = goods.order_by('-price')
-
-            if type == '4':
-                goods = goods.order_by('price')
-
-        foodtype1 = FoodType.objects.filter(typeid=typeid)[0]
-        foodchildnames = foodtype1.childtypenames
-        childnames = foodchildnames.split('#')
-        listnames = []
-        for childname in childnames:
-            dictnames = {}
-            childname = childname.split(':')
-            dictnames['name'] = childname[0]
-            dictnames['id'] = childname[1]
-            listnames.append(dictnames)
-        return render(request, 'market/market.html', {'foodtypes': foodtypes,
-                                                      'goods': goods,
-                                                      'listnames': listnames,
-                                                      'foodtype1': foodtype1,
-                                                      'childid': childid,
-                                                      'user': user})
+        for good in goods:
+            dict1 = {}
+            dict1['id'] = good.id
+            dict1['productimg'] = good.productimg
+            dict1['productlongname'] = good.productlongname
+            dict1['price'] = good.price
+            dict1['marketprice'] = good.marketprice
+            listgoods.append(dict1)
+        data['goods'] = listgoods
+        return JsonResponse(data)
 
 
 def cart(request):
@@ -112,6 +187,7 @@ def calc_total(userid):
     for cart in carts:
         if cart.is_select:
             total += (cart.goods.price * cart.c_num)
+        total = float('%.2f' % total)
     return carts, total
 
 
@@ -184,6 +260,7 @@ def sub_car(request):
                 else:
                     cart.delete()
                     data['c_num'] = 0
+                data['total'] = calc_total(user.id)[1]
         return JsonResponse(data)
 
 
@@ -194,14 +271,116 @@ def change_cart_status(request):
             'coding': 200,
         }
         id = request.POST.get('id')
+        l = request.POST.get('l')
         user = request.user
         if user and user.id:
             cart = CartModel.objects.get(id=id)
+            is_select = cart.is_select
             cart.is_select = not cart.is_select
             cart.save()
             data['is_select'] = cart.is_select
+            carts = CartModel.objects.filter(user_id=user.id)
+            if (len(carts) - int(l)) == 1 and not is_select:
+                data['is_all'] = True
+            else:
+                data['is_all'] = False
+            data['total'] = calc_total(user.id)[1]
         return JsonResponse(data)
 
 
+def is_select_all(request):
+    if request.method == 'POST':
+        data = {
+            'msg': '请求成功！',
+            'coding': 200,
+        }
+        user = request.user
+        l = request.POST.get('len')
+        is_all = request.POST.get('is_all')
+        if user and user.id:
+            carts = CartModel.objects.filter(user_id=user.id)
+            if not is_all:
+                if len(carts) == int(l):
+                    data['is_all'] = True
+                else:
+                    data['is_all'] = False
+
+            elif is_all == 'True':
+                for cart in carts:
+                    cart.is_select = False
+                    cart.save()
+                    data['is_all'] = False
+            else:
+                for cart in carts:
+                    cart.is_select = True
+                    cart.save()
+                    data['is_all'] = True
+
+            data['total'] = calc_total(user.id)[1]
+        return JsonResponse(data)
+
+
+def create_order(request):
+    """生成一个订单并删除购物车中选择的商品"""
+    if request.method == 'GET':
+        user = request.user
+        if user and user.id:
+            carts = CartModel.objects.filter(user_id=user.id, is_select=True)
+            if len(carts) <= 0:
+                return render(request, 'cart/cart.html', {'message': '您未选择商品！'})
+            order = OrderModel.objects.create(
+                o_num=len(carts),
+                user_id=user.id
+            )
+            for cart in carts:
+                OderGoodsModel.objects.create(
+                    goods_id=cart.goods.id, order_id=order.id, goods_num=cart.c_num
+                )
+                cart.delete()
+            return HttpResponseRedirect(reverse('axf:topay', args=(order.id, )))
+
+
+def to_pay(request, order_id):
+    """去付款"""
+    ordergoods = OderGoodsModel.objects.filter(order_id=order_id)
+    return render(request, 'order/order_info.html', {'ordergoods': ordergoods, 'order_id': order_id})
+
+
+def paying(request):
+    """支付"""
+    if request.method == 'GET':
+        order_id = request.GET.get('order_id')
+        order = OrderModel.objects.get(id=order_id)
+        order.o_status = 1
+        order.save()
+        return HttpResponseRedirect('/axf/mine/')
+
+
+def to_wait_pay(request):
+    """跳转到未付款页面"""
+    if request.method == 'GET':
+        user = request.user
+        if user and user.id:
+            orders = OrderModel.objects.filter(user_id=user.id, o_status=0)
+            return render(request, 'order/order_list_wait_pay.html', {'orders': orders})
+
+
+def payed(request):
+    """跳转到待收货页面"""
+    if request.method == 'GET':
+        user = request.user
+        if user and user.id:
+            orders = OrderModel.objects.filter(user_id=user.id, o_status=1)
+            return render(request, 'order/order_list_payed.html', {'orders': orders})
+
+
+def sure_collect(request):
+    """确认收货"""
+    if request.method == 'GET':
+        order_id = request.GET.get('order_id')
+        order = OrderModel.objects.get(id=order_id)
+        order.o_status = 2
+        order.save()
+        return HttpResponseRedirect('/axf/mine/')
 
 

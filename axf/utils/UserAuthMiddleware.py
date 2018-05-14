@@ -14,19 +14,23 @@ class AuthMiddleware(MiddlewareMixin):
         :return:
         """
         a = request.path
-        if request.path == '/uauth/login/' or request.path == '/uauth/logout/':
+        if request.path == '/uauth/logout/' or request.path == '/uauth/login/':
             return None
         ticket = request.COOKIES.get('ticket')
         if request.path == '/axf/cart/':
-
             if not ticket:
                 return HttpResponseRedirect('/uauth/login')
         else:
+
             if not ticket:
                 return None
 
         users = UserModel.objects.filter(u_ticket=ticket)
+
         if not users:
-            return HttpResponseRedirect('/uauth/login')
+            response = HttpResponseRedirect('/axf/mine')
+            ticket = request.COOKIES.get('ticket')
+            response.delete_cookie('ticket')
+            return response
 
         request.user = users[0]

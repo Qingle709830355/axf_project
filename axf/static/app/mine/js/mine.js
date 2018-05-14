@@ -4,7 +4,7 @@ $(function () {
 
         window.open("/axf/orderlist/", target="_self");
 
-    })
+    });
 
     $("#wait_pay_list").click(function () {
 
@@ -12,4 +12,4 @@ $(function () {
 
     })
 
-})
+});

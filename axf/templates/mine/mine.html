@@ -7,7 +7,7 @@
 
 {% block EXTJS %}
 {{ block.super }}
-    <script type="text/javascript" src="{% static 'app/mine/js/mine.js' %}"></script>
+{#    <script type="text/javascript" src="{% static 'app/mine/js/mine.js' %}"></script>#}
 {% endblock %}
 
 {% block content %}
@@ -61,7 +61,7 @@
                                     <!--代付款的数量-->
                                     {{ data.wait }}
                                 </span></dt>
-                            <dd>待付款</dd>
+                            <dd><a href="/axf/towaitpay/" style="color: black">待付款</a></dd>
                         </dl>
 
                     </li>
@@ -72,13 +72,17 @@
                                     <!--待收货的数量-->
                                     {{ data.payed }}
                                 </span></dt>
-                            <dd>待收货</dd>
+                            <dd><a href="/axf/payed/" style="color: black">待收货</a></dd>
                         </dl>
 
                     </li>
                     <li>
                         <dl>
-                            <dt><span class="glyphicon glyphicon-pencil"></span></dt>
+                            <dt><span class="glyphicon glyphicon-pencil"></span>
+                                <span class="badge">
+                                    <!--待收货的数量-->
+                                    {{ data.commit }}
+                                </span></dt>
                             <dd>待评价</dd>
                         </dl>
 

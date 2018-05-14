@@ -4,13 +4,18 @@
 {% block EXTJS %}
     {{ block.super }}
     <script type="text/javascript" src="{% static 'app/user/js/user_register.js' %}"></script>
+    <script>
+        if(('#message').val() != ''){
+            alert(('#message').val())
+        }
+    </script>
 {% endblock %}
 
 
 {% block content %}
 
     <div class="container">
-
+        <input type="hidden" value="{{ message }}" id="message">
         <form method="post" action="" enctype="multipart/form-data" onsubmit="return check_input()">
             {% csrf_token %}
             <div class="form-group">

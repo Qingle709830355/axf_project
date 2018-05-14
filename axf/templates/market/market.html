@@ -13,7 +13,7 @@
 
 
 {% block content %}
-
+    {% csrf_token %}
     <div id="market">
 
         <aside>
@@ -23,9 +23,11 @@
                 <!--闪购分类展示-->
                     <li>
                         <!--链接地址，点击获取分类下的商品信息-->
-                        <a href="/axf/market/?typeid={{ foodtype.typeid }}">{{ foodtype.typename }}</a>
-                        {% if foodtype.typeid == foodtype1.typeid %}
-                            <span class="yellowSlide"></span>
+                        <a href="#" onclick="choose_foodtype({{ foodtype.typeid }})">{{ foodtype.typename }}</a>
+                        {% if forloop.counter == 1 %}
+                            <span class="yellowSlide" id="id_104749" foodtype="{{ foodtype.typeid }}"></span>
+                        {% else %}
+                            <span id="id_{{ foodtype.typeid }}"></span>
                         {% endif %}
                     </li>
                 <!--处理数据结束-->
@@ -46,12 +48,13 @@
             </nav>
 
             <menu>
-                <ul>
+                <ul id="show-goods">
+                    {% csrf_token %}
                     {% for good in goods %}
                     <!--商品信息展示-->
                         <li>
                             <a href="#">
-                                <img src="{{ good.productimg }}" alt="">
+                                <img src="{{ good.productimg }}" alt="" id="good_img">
                                 <div class="shoppingInfo">
                                     <h6>{{ good.productlongname }}</h6>
                                     <p class="detailTag">
@@ -68,7 +71,7 @@
                                 </div>
                             </a>
                         <section>
-                            {% csrf_token %}
+
                             <button goodsid="{{ good.id }}" onclick="subtocart({{ good.id }})">-</button>
                             <span id="span{{ good.id }}">0</span>
                             <button goodsid="{{ good.id }}" onclick="addtocart({{ good.id }})">+</button>
@@ -79,11 +82,11 @@
                 </ul>
 
                 <div id="all_types_container">
-                    <div>
+                    <div id="typeslist">
                         {% for listname in listnames %}
                         <!--加载全部分类的数据-->
-                            <a href="/axf/market/?id={{ listname.id }}&typeid={{ foodtype1.typeid }}">
-                                <span>{{ listname.name }}</span>
+                            <a href="#" onclick="choice_childid({{ listname.id }}, 1)">
+                                <span>{{ listname.childname }}</span>
                             </a>
                         <!--处理数据结束-->
                         {% endfor %}
@@ -96,16 +99,16 @@
                 <div id="sort_container">
                     <div>
 {#      排序传递的也是状态码   0 , 1 ,2  , 3 ,4 ,5...                    #}
-                        <a href="/axf/market/?type={{ 1 }}&typeid={{ foodtype1.typeid }}&id={{ childid }}">
+                        <a href="#" onclick="choice_childid(0, 1)" id="sort_1">
                             <span>综合排序</span>
                         </a>
-                        <a href="/axf/market/?type={{ 2 }}&typeid={{ foodtype1.typeid }}&id={{ childid }}">
+                        <a href="#" onclick="choice_childid(0, 2)" id="sort_2">
                             <span>销量排序</span>
                         </a>
-                        <a href="/axf/market/?type={{ 3 }}&typeid={{ foodtype1.typeid }}&id={{ childid }}">
+                        <a href="#" onclick="choice_childid(0, 3)" id="sort_3">
                             <span>价格降序</span>
                         </a>
-                        <a href="/axf/market/?type={{ 4 }}&typeid={{ foodtype1.typeid }}&id={{ childid }}">
+                        <a href="#" onclick="choice_childid(0, 4)" id="sort_4">
                             <span>价格升序</span>
                         </a>
 

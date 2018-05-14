@@ -62,7 +62,11 @@
                                 <div class="confirm">
                                     {% csrf_token %}
                                     <span class="is_choose" is_select="{{ cart.is_select }}" cart_id="{{ cart.id }}">
-                                        <span id="select_{{ cart.id }}">√</span>
+                                        {% if cart.is_select %}
+                                            <span id="select_{{ cart.id }}" class="singleselect">√</span>
+                                        {% else %}
+                                            <span id="select_{{ cart.id }}" class="singleselect"></span>
+                                        {% endif %}
                                     </span>
                                 </div>
                                 <a href="#">
@@ -84,12 +88,7 @@
                         <li class="payTheBill">
 
                             <div class="confirm" id="all_select">
-                                <span>
-
-                                        <span>√</span>
-
-                                        <span></span>
-
+                                <span id="select_all" onclick="isSelectAll(1)">
                                 </span>
                             </div>
 
@@ -97,8 +96,8 @@
                                 <span>全选</span>
                                 <span id="total">总价: ￥{{ total }}</span>
                             </p>
-
-                            <span id="generate_order">下单</span>
+                            <input id="message" value="{{ message }}" type="hidden">
+                            <span id="generate_order"><a href="/axf/createorder/">下单</a></span>
 
                         </li>
 
